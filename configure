@@ -22,7 +22,7 @@ not() {
 # ---------- Program begins here ----------
 
 srcdir=$(cd $(dirname "$0"); pwd)
-builddir=${srcdir}
+builddir="$(pwd)"
 
 # Default options
 PREFIX=/usr/local
@@ -55,7 +55,7 @@ SDL_CONFIG=sdl-config
 SMPEG_CONFIG=smpeg-config
 FREETYPE_CONFIG=freetype-config
 
-VERSION=`awk '/define VER_NUMBER/ {print $3}' version.h | sed s/-en$//`
+VERSION=`awk '/define VER_NUMBER/ {print $3}' ${srcdir}/version.h | sed s/-en$//`
 
 DISTCLEAN_OTHER=
 
@@ -240,14 +240,14 @@ if test -n "$prev"; then
 fi
 
 internalise_SDL() {
-    INTERNAL_SDL=true	
+    INTERNAL_SDL=true
     INTERNAL_SDL_IMAGE=true
     INTERNAL_SDL_MIXER=true
     INTERNAL_SDL_TTF=true
     INTERNAL_SMPEG=true
-    SDL_CONFIG=./extlib/bin/sdl-config
+    SDL_CONFIG=\${builddir}/extlib/bin/sdl-config
     SDLOTHERCONFIG=--disable-rpath
-    SMPEG_CONFIG=./extlib/bin/smpeg-config
+    SMPEG_CONFIG=\${builddir}/extlib/bin/smpeg-config
 }
 
 if $INTERNAL_LIBS
@@ -276,11 +276,11 @@ echo "Configuring ONScripter-EN $VERSION"
 # Platform
 $echo_n "Checking platform type... ${nobr}"
 if [ -n "$PLATFORM" ]
-then 
+then
     PLATFORM=`$echo_n "$PLATFORM${nobr}" | tr '[:upper:]' '[:lower:]'`
-    if ./config.sub $PLATFORM >/dev/null 2>&1; then PLATFORM=`./config.sub $PLATFORM`; fi
+    if ${srcdir}/config.sub $PLATFORM >/dev/null 2>&1; then PLATFORM=`${srcdir}/config.sub $PLATFORM`; fi
 else
-    PLATFORM=`./config.guess`
+    PLATFORM=`${srcdir}/config.guess`
 fi
 SYS=Posix
 POSIX=Vanilla
@@ -538,9 +538,14 @@ fi
 
 # Libraries
 
+for x in bin lib include share
+do
+    mkdir -p ${builddir}/extlib/"$x" || (echo >&2 "failed to create $x" && exit 1)
+done
+
 if $INTERNAL_SDL
 then
-    SDL_CONFIG=./extlib/bin/sdl-config
+    SDL_CONFIG='$(builddir)'/extlib/bin/sdl-config
 else
     $echo_n "Checking for system SDL... ${nobr}"
     case "$SYS" in
@@ -748,7 +753,7 @@ fi
 
 if $INTERNAL_SMPEG
 then
-    SMPEG_CONFIG=./extlib/bin/smpeg-config
+    SMPEG_CONFIG='$(builddir)'/extlib/bin/smpeg-config
 else
     $echo_n "Checking for system libsmpeg... ${nobr}"
     VER=`($SMPEG_CONFIG --version) 2>/dev/null`
@@ -756,7 +761,7 @@ else
     then echo "yes"
     else echo "no"
 	INTERNAL_SMPEG=true
-	SMPEG_CONFIG=./extlib/bin/smpeg-config
+	SMPEG_CONFIG='$(builddir)'/extlib/bin/smpeg-config
     fi
 fi
 
@@ -789,7 +794,7 @@ fi
 if $INTERNAL_FREETYPE
 then
     INTERNAL_SDL_TTF=true
-    FREETYPE_CONFIG=./extlib/bin/freetype-config
+    FREETYPE_CONFIG='$(builddir)'/extlib/bin/freetype-config
 elif not $INTERNAL_SDL_TTF
 then
     $echo_n "Checking for system SDL_ttf... ${nobr}"
@@ -875,7 +880,7 @@ require $INTERNAL_SDL_TTF   internal_sdl_ttf   SDL_ttf
 genlink() {
     if $1
     then
-        eval "LINK$2=\"extlib/lib/lib$2\\\$(LIBSUFFIX)\""
+        eval "LINK$2=\"${builddir}/extlib/lib/lib$2\\\$(LIBSUFFIX)\""
     else
         eval "LINK$2=-l$2"
     fi
@@ -929,6 +934,12 @@ cat > Makefile <<_EOF
 # Makefile for ONScripter-EN
 
 TOPSRC=${srcdir}
+builddir?=.
+builddir:=\$(abspath \$(builddir))
+
+vpath %.c \$(TOPSRC)
+vpath %.cpp \$(TOPSRC)
+vpath %.h \$(TOPSRC)
 
 WIN32=$W32
 OBJSUFFIX=$OBJ
@@ -946,10 +957,10 @@ INTERNAL_LIBJPEG=\$(findstring true,$INTERNAL_LIBJPEG)
 INTERNAL_OGGLIBS=\$(findstring true,$INTERNAL_OGGLIBS)
 SDL_CONFIG=$SDL_CONFIG
 
-export PATH     :=   \$(shell pwd)/extlib/bin:\$(PATH)
-export CFLAGS   := -I\$(shell pwd)/extlib/include \$(CFLAGS) $VECFLAGS
-export CPPFLAGS := -I\$(shell pwd)/extlib/include \$(CPPFLAGS) $VECFLAGS
-export LDFLAGS  := -L\$(shell pwd)/extlib/lib \$(LDFLAGS) $EXTRALDFLAGS
+export PATH     :=   \$(builddir)/extlib/bin:\$(PATH)
+export CFLAGS   := -I\$(builddir)/extlib/include \$(CFLAGS) $VECFLAGS
+export CPPFLAGS := -I\$(builddir)/extlib/include \$(CPPFLAGS) $VECFLAGS
+export LDFLAGS  := -L\$(builddir)/extlib/lib \$(LDFLAGS) $EXTRALDFLAGS
 export CSTD     := -std=c99
 export CXXSTD   := $CXXSTD
 
@@ -962,7 +973,7 @@ export RANLIB  := $RANLIB
 
 # ONScripter variables
 OSCFLAGSEXTRA = $CFLAGSEXTRA \$(OSCTMPFLAGS)
-INCS = $X11_CFLAGS -Iextlib/include \$(shell \$(SDL_CONFIG) --cflags)      \\
+INCS = $X11_CFLAGS -I\$(TOPSRC) -Iextlib/include \$(shell \$(SDL_CONFIG) --cflags)      \\
                         \$(shell $SMPEG_CONFIG --cflags)    \\
                         \$(shell $FREETYPE_CONFIG --cflags) \\
        \$(shell [ -d extlib/include/SDL ] && echo -Iextlib/include/SDL)
@@ -1100,26 +1111,26 @@ fi
 if [ "$SYS" != "MinGW" ] && [ "$SYS" != "MacOSX" ]; then
 cat >> Makefile <<_EOF
 
-ICONFILE ?= ons-en.png
+ICONFILE ?= \$(TOPSRC)/ons-en.png
 RESOURCES ?= \$(ICONFILE) =icon.png
 OTHER_OBJS = resources\$(OBJSUFFIX) $OTHER_OBJS
-RC_HDRS = resources.h
+RC_HDRS = \$(TOPSRC)/resources.h
 RCCLEAN = resources.cpp embed$EXE \$(OTHER_OBJS)
 
 resources\$(OBJSUFFIX): \$(RC_HDRS)
 
-resources.cpp: embed$EXE \$(filter-out =%,\$(RESOURCES))
-	./embed$EXE \$(patsubst =%,%,\$(RESOURCES)) > \$@
+resources.cpp: \$(builddir)/embed$EXE \$(filter-out =%,\$(RESOURCES))
+	\$(builddir)/embed$EXE \$(patsubst =%,%,\$(RESOURCES)) > \$@
 
-embed$EXE: embed.cpp
+\$(builddir)/embed$EXE: embed.cpp
 	\$(CXX) \$(CXXSTD) \$< -o \$@
 _EOF
 fi
 
 cat >> Makefile <<_EOF
 
-include Makefile.extlibs
-include Makefile.onscripter
+include \$(TOPSRC)/Makefile.extlibs
+include \$(TOPSRC)/Makefile.onscripter
 
 .PHONY: libtoolreplace
 libtoolreplace: | \$(EB)
@@ -1143,7 +1154,7 @@ then
 cat >> Makefile <<_EOF
 
 RCFILE ?= onscripter.rc
-WICONFILE ?= ons-en.ico
+WICONFILE ?= \$(TOPSRC)/ons-en.ico
 RCCLEAN = \$(RCFILE)
 win32rc.o: \$(RCFILE) \$(WICONFILE)
 	windres \$< -o \$@

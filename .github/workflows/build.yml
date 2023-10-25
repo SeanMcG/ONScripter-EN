@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - build-out-of-tree
   pull_request:
     branches:
       - master
@@ -30,13 +31,9 @@ jobs:
       env:
         CC: ${{ matrix.cc }}
       run: |
-        ./configure --with-internal-libs
-    - name: reconfigure extlibs (ogg)
-      run: |
-        cd extlib/src/libogg-1.3.5
-        autoreconf -fi
-        autoupdate
+        mkdir build
+        cd build && ../configure --with-internal-libs
     - name: build
       run: |
         NCPUS=$(getconf _NPROCESSORS_ONLN)
-        make -j $NCPUS VERBOSE=true
+        make -j $NCPUS -C build VERBOSE=true
