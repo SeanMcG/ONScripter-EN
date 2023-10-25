@@ -1,0 +1,23 @@
+--- /src/ONScripter-EN/extlib/src/zlib-1.2.3/Makefile	2023-11-01 00:29:09.889737292 -0400
++++ zlib/Makefile	2023-11-02 01:02:23.649471941 -0400
+@@ -16,6 +16,11 @@
+ # To install in $HOME instead of /usr/local, use:
+ #    make install prefix=$HOME
+ 
++SRC_PATH=$(TOPSRC)/extlib/src/zlib-1.2.3
++
++vpath %.h $(SRC_PATH)
++vpath %.c $(SRC_PATH)
++
+ CC ?= cc
+ 
+ CFLAGS=-O
+@@ -93,7 +98,7 @@
+ install: $(LIBS)
+ 	-@if [ ! -d $(includedir)  ]; then mkdir -p $(includedir); fi
+ 	-@if [ ! -d $(libdir)      ]; then mkdir -p $(libdir); fi
+-	cp zlib.h zconf.h $(includedir)
++	cp $(SRC_PATH)/zlib.h $(SRC_PATH)/zconf.h $(includedir)
+ 	chmod 644 $(includedir)/zlib.h $(includedir)/zconf.h
+ 	cp $(LIBS) $(libdir)
+ 	cd $(libdir); chmod 755 $(LIBS)
