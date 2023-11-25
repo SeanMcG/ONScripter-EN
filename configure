@@ -1073,7 +1073,7 @@ cat >> Makefile <<_EOF
 
 ifdef DEBUG
 OSCFLAGS = -O0 -g -pg -ggdb -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
-export LDFLAGS  := -pg \$(LDFLAGS)
+#export LDFLAGS  := -pg \$(LDFLAGS)
 else
   ifdef PROF
   OSCFLAGS = -O2 -pg -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)

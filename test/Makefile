@@ -4,8 +4,29 @@
 # borrowed and slightly modified from VLC
 #
 
+TOPSRC := $(abspath ..)
+OBJSUFFIX = .o
+LIBSUFFIX = .a
+
+CXX ?= g++
+CXXSTD = -std=c++98
+CXXFLAGS = -g -Wall -Wextra -DGTEST_LANG_CXX11=0 -pthread
+
+# TODO -- only on Linux
+ifndef NOT_LINUX
+CXXFLAGS += -DLINUX -DUSE_OGG_VORBIS
+endif
+
+ifeq ($(COVERAGE),1)
+CXXFLAGS += -fprofile-arcs -ftest-coverage -O0
+endif
+
 GTEST_VERSION=1.8.1
 GTEST_URL=https://github.com/google/googletest/archive/release-$(GTEST_VERSION).zip
+GTEST_DIR=googletest/googletest
+GTEST_INCDIR=$(GTEST_DIR)/include
+GMOCK_DIR=googletest/googlemock
+GMOCK_INCDIR=$(GMOCK_DIR)/include
 
 ifeq ($(shell command -v curl >/dev/null 2>&1 || echo FAIL),)
 download = curl -f -L -- "$(1)" > "$@.tmp" && touch $@.tmp && mv $@.tmp $@
@@ -35,6 +56,8 @@ download_pkg = \
 UNPACK_DIR = $(patsubst %.tar,%,$(basename $(notdir $<)))
 MOVE = mv $(UNPACK_DIR) $(@) && touch $(@)
 
+all: test
+
 googletest-release-$(GTEST_VERSION).zip:
 	$(call download_pkg,$(GTEST_URL),googletest)
 
@@ -43,17 +66,46 @@ googletest: googletest-release-$(GTEST_VERSION).zip
 	(cd $(UNPACK_DIR) && autoreconf -fiv)
 	$(MOVE)
 
+include Makefile.testlibs
+
+.cpp$(OBJSUFFIX):
+	$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(GTEST_DIR) $(CXXFLAGS) -c $< -o $@
+
+.cc$(OBJSUFFIX):
+	$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(GTEST_DIR) $(CXXFLAGS) -c $< -o $@
+
+test_%: test_%.cpp $(TOPSRC)/%.cpp libgtest$(LIBSUFFIX)
+	@$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $^ -o $@
+	./$@
+
+# TODO only when using internal bzlib?
+EXTLIB_INCDIR = $(TOPSRC)/extlib/include
+
+# Debian does not supply pkg-config data in libbz2-dev (what the hell?!)
+LIBS_bz2 = -lbz2
+
+LIBS_gmock = libgmock$(LIBSUFFIX) libgtest$(LIBSUFFIX)
+
+# TODO abstract out the dependency on 'sjis2utf16.cpp'
+test_Encoding: test_Encoding.cpp $(TOPSRC)/Encoding.cpp $(TOPSRC)/sjis2utf16.cpp libgtest$(LIBSUFFIX)
+	@$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $^ -o $@
+	./$@
+# TODO test_graphics_routines{,MMX,SSE2,AltiVec} (requires some fancy footwork & pivots for CPU type)
+# TODO test_{DirtyRect,FontInfo,ScriptHandler} needs SDL
+TESTEXE := test_Encoding test_NsaReader
+
+test: $(TESTEXE)
+
 CLEAN_PKG += googletest
 DISTCLEAN_PKG += googletest-release-$(GTEST_VERSION).zip
 
-all: googletest
-
 clean::
+	$(RM) $(CLEAN_OBJ) $(TESTEXE)
 	$(RM) -R $(CLEAN_PKG)
 
 distclean:: clean
 	$(RM) $(DISTCLEAN_PKG)
 
-.PHONY: all clean distclean
+.PHONY: all clean distclean test $(TESTEXE)
 
 .DELETE_ON_ERROR:

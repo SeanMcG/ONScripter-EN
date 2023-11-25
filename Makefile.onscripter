@@ -84,10 +84,20 @@ ONSCRIPTER_HEADER = ONScripterLabel.h $(PARSER_HEADER)
 
 ALL: $(TARGET)$(EXESUFFIX) tools
 
+#ifdef COVERAGE
+OSCFLAGS += -fprofile-arcs -ftest-coverage
+LDFLAGS += -fprofile-arcs -ftest-coverage
+CLEANUP += $(ONSCRIPTER_OBJS:.o=.gcda) $(ONSCRIPTER_OBJS:.o=.gcno)
+#endif
+
 $(TARGET)$(EXESUFFIX): $(ONSCRIPTER_OBJS)
 	$(CXX) -o $@ $(LDFLAGS) $(ONSCRIPTER_OBJS) $(LIBS)
 
 $(ONSCRIPTER_OBJS): $(EXTRADEPS)
+
+.PHONY: check
+check: $(TARGET)$(EXESUFFIX) test/Makefile
+	$(MAKE) -C test CXX="$(CXX)" COVERAGE=$(COVERAGE)
 
 tools: $(TOOL_EXTRADEPS) $(TOOLS)
 
