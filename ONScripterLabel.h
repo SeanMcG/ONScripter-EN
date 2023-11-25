@@ -643,6 +643,8 @@ private:
             button_type = NORMAL_BUTTON;
             next = NULL;
             same = NULL;
+            no = -1;
+            sprite_no = -1;
             exbtn_ctl = NULL;
             anim[0] = anim[1] = NULL;
             show_flag = 0;

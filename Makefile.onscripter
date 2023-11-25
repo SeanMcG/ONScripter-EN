@@ -83,10 +83,20 @@ ONSCRIPTER_HEADER = ONScripterLabel.h $(PARSER_HEADER)
 
 ALL: $(TARGET)$(EXESUFFIX) tools
 
+#ifdef COVERAGE
+OSCFLAGS += -fprofile-arcs -ftest-coverage
+LDFLAGS += -fprofile-arcs -ftest-coverage
+CLEANUP += $(ONSCRIPTER_OBJS:.o=.gcda) $(ONSCRIPTER_OBJS:.o=.gcno)
+#endif
+
 $(TARGET)$(EXESUFFIX): $(ONSCRIPTER_OBJS)
 	$(CXX) -o $@ $(LDFLAGS) $(ONSCRIPTER_OBJS) $(LIBS)
 
 $(ONSCRIPTER_OBJS): $(EXTRADEPS)
+
+.PHONY: check
+check: $(TARGET)$(EXESUFFIX) test/Makefile
+	$(MAKE) -C test CXX="$(CXX)" COVERAGE=$(COVERAGE)
 
 tools: $(TOOL_EXTRADEPS) $(TOOLS)
 
@@ -192,7 +202,7 @@ $(TDIR)sjis2utf16$(OBJSUFFIX): sjis2utf16.cpp
 
 SarReader$(OBJSUFFIX):    $(READER_HEADER) SarReader.h
 NsaReader$(OBJSUFFIX):    $(READER_HEADER) SarReader.h NsaReader.h 
-DirectReader$(OBJSUFFIX): $(READER_HEADER) DirectReader.h
+DirectReader$(OBJSUFFIX): $(READER_HEADER) DirectReader.h PathProvider.h
 ScriptHandler$(OBJSUFFIX): ScriptHandler.h Encoding.h
 ScriptParser$(OBJSUFFIX): $(PARSER_HEADER)
 ScriptParser_command$(OBJSUFFIX): $(PARSER_HEADER)

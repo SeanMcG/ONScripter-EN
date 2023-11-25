@@ -1248,7 +1248,6 @@ int ScriptHandler::checkClickstr(const char *buf, bool recursive_flag)
     if (clickstr_list == NULL) return 0;
     bool only_double_byte_check = true;
     char *click_buf = clickstr_list;
-    int n;
 
     while(click_buf[0]){
 
