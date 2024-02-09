@@ -37,6 +37,7 @@ FASTMATH=-ffast-math
 WERROR=""
 CXXSTD="-std=c++98"
 STRICT=
+STACKPROTECT=
 INTERNAL_LIBS=false
 INTERNAL_SDL=false
 INTERNAL_SDL_IMAGE=false
@@ -97,6 +98,8 @@ do
       --no-werror | -no-werror)
         WERROR=""
         ;;
+      --hardened)
+        STACKPROTECT="-fstack-protector" ;;
       --unsupported-compiler | -unsupported-compiler)
         UNSUPPORTED_COMPILER=true ;;
       --unsupported-compiler=* | -unsupported-compiler=*)
@@ -1051,7 +1054,7 @@ LIBS = $X11_LIBS -Lextlib/lib \\
        $LINKSDL_ttf \$(shell $FREETYPE_CONFIG --libs) \\
        $LINKbz2 \$(if \$(findstring true,$INTERNAL_SDL),$INTERNAL_LDFLAGS)
 
-DEFS = -DLINUX -DUSE_OGG_VORBIS $EXTRA_DEPS
+DEFS = -DLINUX -DUSE_OGG_VORBIS -D_FORTIFY_SOURCE=2 $EXTRA_DEPS
 EXT_OBJS = $GFX_EXT_OBJS
 _EOF
 ;; esac
@@ -1075,7 +1078,7 @@ else
   OSCFLAGS = -O2 -pg -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
   export LDFLAGS  := -pg \$(LDFLAGS)
   else
-  OSCFLAGS = -O2 -fomit-frame-pointer -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
+  OSCFLAGS = -O2 -fomit-frame-pointer $STACKPROTECT -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
   endif
 endif
 
