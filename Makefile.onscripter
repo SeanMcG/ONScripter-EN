@@ -88,10 +88,12 @@ PARSER_HEADER = $(EXTRADEPS) SarReader.h NsaReader.h DirectReader.h	\
                 AnimationInfo.h FontInfo.h DirtyRect.h Layer.h LUAHandler.h
 ONSCRIPTER_HEADER = ONScripterLabel.h $(PARSER_HEADER)
 
+HARDEN_OPTS_GCC = -Wl,-z,now -Wl,-z,relro
+
 ALL: $(TARGET)$(EXESUFFIX) tools
 
 $(TARGET)$(EXESUFFIX): $(ONSCRIPTER_OBJS)
-	$(CXX) -o $@ $(SANFLAGS) $(LDFLAGS) $(ONSCRIPTER_OBJS) $(LIBS)
+	$(CXX) -o $@ $(SANFLAGS) $(LDFLAGS) $(HARDEN_OPTS_GCC) $(ONSCRIPTER_OBJS) $(LIBS)
 
 $(ONSCRIPTER_OBJS): $(EXTRADEPS)
 
