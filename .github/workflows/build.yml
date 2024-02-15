@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - hardened
   pull_request:
     branches:
       - master
@@ -30,7 +31,7 @@ jobs:
       env:
         CC: ${{ matrix.cc }}
       run: |
-        ./configure --with-internal-libs
+        ./configure --with-internal-libs --hardened
     - name: reconfigure extlibs (ogg)
       run: |
         cd extlib/src/libogg-1.3.5
