@@ -30,7 +30,7 @@ jobs:
         CC: ${{ matrix.c_compiler }}
         CXX: ${{ matrix.cpp_compiler }}
       run: |
-        ./configure --with-internal-libs
+        ./configure --with-internal-libs --hardened
     - name: reconfigure extlibs (ogg)
       run: |
         cd extlib/src/libogg-1.3.5
