@@ -503,7 +503,7 @@ g++|clang++|intel++) DEPFLAGS="-MMD -MF \$(@:.o=.d) -MT \$@" ;;
 esac
 
 case "$CXX_TYPE" in
-g++) CFLAGSEXTRA=-Wall ;;
+g++) CFLAGSEXTRA="-Wall -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-function -Wno-write-strings -Wno-misleading-indentation -Wno-int-in-bool-context -Wno-class-memaccess -Wno-narrowing" ;;
 esac
 
 # compiler sanitization support
