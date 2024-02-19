@@ -368,7 +368,7 @@ then
 fi
 
 case "$CXX_TMP" in
-g++* | *apple*g++*) CFLAGSEXTRA=-Wall ;;
+g++* | *apple*g++*) CFLAGSEXTRA="-Wall -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-function -Wno-write-strings -Wno-misleading-indentation -Wno-int-in-bool-context -Wno-class-memaccess -Wno-narrowing" ;;
 esac
 
 # Auto-vectorization
