@@ -1068,7 +1068,7 @@ cat >> Makefile <<_EOF
 .SUFFIXES: $OBJ .cpp .h .c
 
 ifdef DEBUG
-OSCFLAGS = -O0 -g -pg -ggdb -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
+OSCFLAGS = -O0 -fsanitize=address -g -pg -ggdb -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
 export LDFLAGS  := -pg \$(LDFLAGS)
 else
   ifdef PROF
