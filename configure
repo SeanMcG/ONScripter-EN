@@ -1079,7 +1079,7 @@ else
   OSCFLAGS = -O2 -pg -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
   export LDFLAGS  := -pg \$(LDFLAGS)
   else
-  OSCFLAGS = -O2 -fomit-frame-pointer -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
+  OSCFLAGS = -O2 -fomit-frame-pointer -fsanitize=leak -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
   endif
 endif
 
