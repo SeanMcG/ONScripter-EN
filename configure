@@ -398,23 +398,7 @@ rm -rf .configtest
 mkdir .configtest
 cd .configtest
 
-if $USE_CPU_GFX
-then
-    $echo_n "Checking for compiler cpuid support... ${nobr}"
-    cat > test.cc <<-_EOF
-	#include <cpuid.h>
-	unsigned int eax, ebx, ecx, edx; int main(int argc, char**argv){return __get_cpuid(1, &eax, &ebx, &ecx, &edx);}
-	_EOF
-    $CXX test.cc -o ctest >/dev/null 2>&1
-    case $? in
-    0) echo "yes" ;;
-    *) echo "no"; USE_CPU_GFX=false ;;
-    esac
-    if not $USE_CPU_GFX
-    then
-        echo "     Won't compile custom graphics routines"
-    fi
-fi
+# NOTE temporarily remove x86{,-64} intrinsics test
 
 if $USE_CPU_GFX
 then
