@@ -1,0 +1,13 @@
+usr/bin/batchconv
+usr/bin/nbzdec
+usr/bin/ns2conv
+usr/bin/ns2dec
+usr/bin/ns2make
+usr/bin/nsaconv
+usr/bin/nsadec
+usr/bin/nsamake
+usr/bin/nscdec
+usr/bin/nscmake
+usr/bin/sarconv
+usr/bin/sardec
+usr/bin/sarmake

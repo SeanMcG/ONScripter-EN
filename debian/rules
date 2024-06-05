@@ -1,0 +1,25 @@
+#!/usr/bin/make -f
+
+export V=1
+
+# sets DEBIAN_VERSION variable
+#include /usr/share/dpkg/pkg-info.mk
+
+# Get the Debian version revision:
+#DEB_REVISION := $(word 2, $(subst -, ,$(DEB_VERSION)))
+
+# sets DEB_HOST_* variables
+include /usr/share/dpkg/architecture.mk
+
+export DEB_CXXFLAGS_MAINT_APPEND = -Wno-register -Wno-misleading-indentation
+
+# export DEB_BUILD_MAINT_OPTIONS = hardening=+all
+
+%:
+	dh $@
+
+override_dh_auto_configure:
+	dh_auto_configure -- --with-internal-libs
+
+override_dh_auto_test:
+	:

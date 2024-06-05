@@ -1,0 +1,25 @@
+Source: onscripter-en
+Maintainer: Sean McGovern <gseanmcg@gmail.com>
+Section: misc
+Priority: optional
+Standards-Version: 4.6.2
+Build-Depends: debhelper-compat (= 13),
+  libx11-dev,
+  libxext-dev,
+  libxrandr-dev,
+  libasound2-dev,
+  libpulse-dev,
+  pkgconf
+Rules-Requires-Root: no
+
+Package: onscripter-en
+Architecture: amd64 i386 powerpc
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: BLAH
+ onscripter-en BLAH BLAH BLAH.
+
+Package: onscripter-en-tools
+Architecture: amd64 i386 powerpc
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: BLAH
+ onscripter-en BLAH BLAH BLAH.

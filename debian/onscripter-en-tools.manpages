@@ -1,0 +1,13 @@
+tools/man/batchconv.1
+debian/nbzdec.1
+tools/man/ns2conv.1
+tools/man/ns2dec.1
+tools/man/ns2make.1
+tools/man/nsaconv.1
+tools/man/nsadec.1
+tools/man/nsamake.1
+tools/man/nscdec.1
+tools/man/nscmake.1
+tools/man/sarconv.1
+tools/man/sardec.1
+tools/man/sarmake.1
