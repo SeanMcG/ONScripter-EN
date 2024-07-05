@@ -11,8 +11,8 @@ namespace ons_effect {
 
 namespace ons_math {
 	typedef struct math_funcs {
-	    void (*sin)(double);
-	    void (*cos)(double);
+	    void (*vsin)(double*, int);
+	    void (*vcos)(double*, int);
 	} math_funcs;
 }
 
