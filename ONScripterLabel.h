@@ -916,7 +916,9 @@ private:
         TRIG_TABLE_SIZE = 256,
         TRIG_FACTOR     = 16384
     };
-    int *sin_table, *cos_table;
+    DSP_ALIGN16(int *, sin_table);
+    DSP_ALIGN16(int *, cos_table);
+    ons_math::math_funcs *math_funcs;
     int *whirl_table;
 
     void buildSinTable();
