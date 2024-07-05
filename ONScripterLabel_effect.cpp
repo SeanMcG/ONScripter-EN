@@ -33,6 +33,7 @@
  */
 
 #include "ONScripterLabel.h"
+#include "ONScripterLabel_effect.h"
 
 #define EFFECT_STRIPE_WIDTH ExpandPos(16)
 #define EFFECT_STRIPE_CURTAIN_WIDTH ExpandPos(24)

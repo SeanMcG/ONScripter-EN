@@ -46,6 +46,7 @@
 #include "DirPaths.h"
 #include "ScriptParser.h"
 #include "DirtyRect.h"
+#include "ONScripterLabel_effect.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
@@ -102,6 +103,16 @@
 #define KEYPRESS_NULL ((SDLKey)(SDLK_LAST+1)) // "null" for keypress variables
 
 void clearTimer(SDL_TimerID &timer_id);
+
+#if defined(__GNUC__) || defined(__clang__) || defined(__INTEL_COMPILER)
+
+#define DSP_ALIGN16(t,v) t __attribute__ ((aligned(16))) v
+
+#else
+
+#define DSP_ALIGN16(t,v) t v
+
+#endif
 
 class ONScripterLabel : public ScriptParser
 {
