@@ -667,6 +667,7 @@ ONScripterLabel::ONScripterLabel()
   font_file(NULL), root_glyph_cache(NULL),
   string_buffer_breaks(NULL), string_buffer_margins(NULL),
   sin_table(NULL), cos_table(NULL), whirl_table(NULL),
+  math_funcs(NULL),
   breakup_cells(NULL), breakup_cellforms(NULL), breakup_mask(NULL),
   shelter_select_link(NULL), default_cdrom_drive(NULL),
   wave_file_name(NULL), seqmusic_file_name(NULL), seqmusic_info(NULL),
@@ -735,7 +736,10 @@ ONScripterLabel::ONScripterLabel()
 #else
     png_mask_type = PNG_MASK_USE_ALPHA;
 #endif
-    
+
+    math_funcs = new ons_math::math_funcs;
+    math_funcs->vsin = NULL; // TODO extract C version
+    math_funcs->vcos = NULL;
     //init arrays
     int i=0;
     for (i=0 ; i<MAX_PARAM_NUM ; i++) bar_info[i] = prnum_info[i] = NULL;
@@ -754,7 +758,7 @@ ONScripterLabel::ONScripterLabel()
 
     //setting this to let script_h call error message popup routines
     script_h.setReporter(new ONScripterReporter(this));
-    
+
 #if defined (USE_X86_GFX) && !defined(MACOSX)
     // determine what functions the cpu supports (Mion)
     {
@@ -802,7 +806,7 @@ ONScripterLabel::ONScripterLabel()
         using namespace ons_gfx;
         unsigned int func = CPUF_NONE;
         int altivec_present = 0;
-    
+
         size_t length = sizeof(altivec_present);
         int error = sysctlbyname("hw.optional.altivec", &altivec_present, &length, NULL, 0);
         if(error) {
@@ -846,6 +850,7 @@ ONScripterLabel::~ONScripterLabel()
 
     delete[] sprite_info;
     delete[] sprite2_info;
+    delete math_funcs;
 
     if (default_font) delete[] default_font;
     if (font_file) delete[] font_file;
