@@ -64,18 +64,26 @@ test_DirectReader$(EXESUFFIX): test_DirectReader.cpp $(TOPSRC)/DirectReader.cpp 
 	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(BZIP2_CPPFLAGS) $^ $(LIBS_bz2) -o $@
 	./$@
 
-TESTEXE := test_Encoding$(EXESUFFIX) test_BaseReader$(EXESUFFIX) test_DirPaths$(EXESUFFIX) test_DirectReader$(EXESUFFIX)
+TESTSAR := arc.sar
+TESTSAR_DIR := testsar
+CLEAN_TEST += $(TESTSAR)
+$(TESTSAR): $(TOPSRC)/ons-en.png
+	$(Q)$(RM) $(TESTSAR)
+	$(Q)mkdir $(TESTSAR_DIR) || true
+	$(Q)cp $< $(TESTSAR_DIR)
+	$(Q)$(TOPSRC)/tools/sarmake $@ -d $(TESTSAR_DIR)
+	$(Q)$(RM) -R $(TESTSAR_DIR)
+
+test_SarReader$(EXESUFFIX): test_SarReader.cpp $(TOPSRC)/SarReader.cpp $(TOPSRC)/DirectReader.cpp libgtest$(LIBSUFFIX) libgmock$(LIBSUFFIX) $(TESTSAR)
+	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(BZIP2_CPPFLAGS) $(filter-out $(TESTSAR),$^) $(LIBS_bz2) -o $@
+	./$@
+
+TESTEXE := test_Encoding$(EXESUFFIX) test_BaseReader$(EXESUFFIX) test_DirPaths$(EXESUFFIX) test_DirectReader$(EXESUFFIX) test_SarReader$(EXESUFFIX)
 
 test: $(TESTEXE)
 
-#CLEAN_PKG += googletest
-
 clean::
-	$(RM) $(CLEAN_OBJ) $(TESTEXE)
-	$(RM) -R $(CLEAN_PKG)
-
-#distclean:: clean
-#	$(RM) $(DISTCLEAN_PKG)
+	$(RM) $(CLEAN_OBJ) $(CLEAN_TEST) $(TESTEXE)
 
 .PHONY: all clean test $(TESTEXE)
 
