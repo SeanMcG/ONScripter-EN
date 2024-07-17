@@ -1,0 +1,268 @@
+diff --git a/DirectReader.cpp b/DirectReader.cpp
+index 45fadd5..da36e67 100644
+--- a/DirectReader.cpp
++++ b/DirectReader.cpp
+@@ -31,6 +31,7 @@
+ // via nsamake
+ 
+ #include "DirectReader.h"
++#include <cerrno>
+ #include <bzlib.h>
+ #if !defined(WIN32) && !defined(MACOS9) && !defined(PSP) && !defined(__OS2__)
+ #include <dirent.h>
+@@ -117,9 +118,11 @@ DirectReader::~DirectReader()
+     }
+ }
+ 
+-bool hasTwoByteChar(const char *str)
++bool hasTwoByteChar(const unsigned char *str)
+ {
+-    const char *ptr = str;
++    if (str == NULL) return false;
++
++    const unsigned char *ptr = str;
+     while (*ptr != 0) {
+         if (IS_TWO_BYTE(*ptr) )
+             return true;
+@@ -140,8 +143,10 @@ FILE *DirectReader::fopen(const char *path, const char *mode)
+         file_path_len = len;
+         if (file_full_path) delete[] file_full_path;
+         file_full_path = new char[file_path_len];
++        file_full_path[0] = '\0';
+         if (file_sub_path) delete[] file_sub_path;
+         file_sub_path = new char[file_path_len];
++        file_sub_path[0] = '\0';
+     }
+     for (int n=0; n<archive_path->get_num_paths(); n++) {
+         sprintf( file_full_path, "%s%s", archive_path->get_path(n), path );
+@@ -151,7 +156,7 @@ FILE *DirectReader::fopen(const char *path, const char *mode)
+         if (fp) return fp;
+ #ifdef WIN32
+         // Windows uses UTF-16, so convert for Japanese characters
+-        else if (hasTwoByteChar(file_full_path)) {
++        else if (hasTwoByteChar(reinterpret_cast<const unsigned char *>(file_full_path))) {
+             wchar_t *u16_tmp, *umode;
+             //convert the file path to from Shift-JIS to Wide chars (Unicode)
+             int wc_size = MultiByteToWideChar(932, 0, file_full_path, -1, NULL, 0);
+@@ -181,8 +186,9 @@ FILE *DirectReader::fopen(const char *path, const char *mode)
+     if (n > 0)
+         len = strlen(archive_path->get_path(0));
+     if (len > 0) {
+-        dp = opendir(archive_path->get_path(0));
+-        sprintf( file_full_path, "%s%s", archive_path->get_path(0), path );
++        const char *first_path = archive_path->get_path(0);
++        dp = opendir(first_path);
++        sprintf( file_full_path, "%s%s", first_path, path );
+     } else {
+         dp = opendir(".");
+         sprintf( file_full_path, "%s", path );
+@@ -193,10 +199,11 @@ FILE *DirectReader::fopen(const char *path, const char *mode)
+     while (1){
+         if (dp == NULL) {
+             if (i < n) {
+-                len = strlen(archive_path->get_path(i));
+-                dp = opendir(archive_path->get_path(i));
++                const char *path_at_index = archive_path->get_path(i);
++                len = strlen(path_at_index);
++                dp = opendir(path_at_index);
+                 sprintf( file_full_path, "%s%s",
+-                        archive_path->get_path(i), path );
++                        path_at_index, path );
+                 cur_p = file_full_path+len;
+                 i++;
+             } else
+@@ -319,6 +326,7 @@ unsigned long DirectReader::swapLong( unsigned long ch )
+ 
+ int DirectReader::open( const char* /*name*/ )
+ {
++    (void)name;
+     return 0;
+ }
+ 
+@@ -346,8 +354,12 @@ void DirectReader::registerCompressionType( const char *ext, int type )
+     
+ int DirectReader::getRegisteredCompressionType( const char *file_name )
+ {
+-    const char *ext_buf = file_name + strlen(file_name);
+-    while( *ext_buf != '.' && ext_buf != file_name ) ext_buf--;
++    const int max_len = archive_path->max_path_len();
++    char *name = new char[max_len];
++    name[0] = '\0';
++    ::strncpy(name, file_name, max_len - 1);
++    const char *ext_buf = name + strlen(name);
++    while( *ext_buf != '.' && ext_buf != name ) ext_buf--;
+     ext_buf++;
+     
+     strcpy( capital_name, ext_buf );
+@@ -362,11 +374,14 @@ int DirectReader::getRegisteredCompressionType( const char *file_name )
+         reg = reg->next;
+     }
+ 
++    delete[] name;
++
+     return NO_COMPRESSION;
+ }
+     
+ struct DirectReader::FileInfo DirectReader::getFileByIndex( unsigned int /*index*/ )
+ {
++    (void)index;
+     DirectReader::FileInfo fi;
+     return fi;
+ }
+@@ -378,6 +393,9 @@ FILE *DirectReader::getFileHandle( const char *file_name, int &compression_type,
+     unsigned int i;
+ 
+     compression_type = NO_COMPRESSION;
++    if (file_name == NULL) {
++        return fp;
++    }
+     size_t len = strlen( file_name );
+     if ( len > MAX_FILE_NAME_LENGTH ) len = MAX_FILE_NAME_LENGTH;
+     memcpy( capital_name, file_name, len );
+@@ -420,15 +438,20 @@ FILE *DirectReader::getFileHandle( const char *file_name, int &compression_type,
+ #endif
+     
+     *length = 0;
+-    if ( ((fp = fopen( capital_name, "rb" )) != NULL) && (len >= 3) ){
++    fp = fopen( capital_name, "rb" );
++    if ( fp != NULL && len >= 3 ) {
+         compression_type = getRegisteredCompressionType( capital_name );
+         if ( compression_type == NBZ_COMPRESSION || compression_type == SPB_COMPRESSION ){
+             *length = getDecompressedFileLength( compression_type, fp, 0 );
++        } else {
++            if(fseek( fp, 0, SEEK_END ) == 0) {
++                *length = ftell( fp );
++            } else {
++                fprintf(stderr, "Error seeking %s\n", capital_name);
++            }
+         }
+-        else{
+-            fseek( fp, 0, SEEK_END );
+-            *length = ftell( fp );
+-        }
++    } else {
++        fprintf(stderr, "Error attempting to open %s , errno = %d\n", capital_name, errno);
+     }
+ 
+     return fp;
+@@ -436,6 +459,8 @@ FILE *DirectReader::getFileHandle( const char *file_name, int &compression_type,
+ 
+ size_t DirectReader::getFileLength( const char *file_name )
+ {
++    if (file_name == NULL || strlen(file_name) == 0) return 0;
++
+     int compression_type;
+     size_t len;
+     FILE *fp = getFileHandle( file_name, compression_type, &len );
+@@ -448,6 +473,11 @@ size_t DirectReader::getFileLength( const char *file_name )
+ size_t DirectReader::getFile( const char *file_name, unsigned char *buffer,
+                               int *location )
+ {
++    if (file_name == NULL || strlen(file_name) == 0) {
++        if ( location ) *location = ARCHIVE_TYPE_NONE;
++        return 0;
++    }
++    
+     int compression_type;
+     size_t len, c, total = 0;
+     FILE *fp = getFileHandle( file_name, compression_type, &len );
+@@ -552,6 +582,9 @@ void DirectReader::convertFromSJISToUTF8( char *dst_buf, const char *src_buf )
+     int mb_size = WideCharToMultiByte(CP_UTF8, 0, u16_tmp, wc_size, dst_buf, 0, NULL, NULL);
+     WideCharToMultiByte(CP_UTF8, 0, u16_tmp, wc_size, dst_buf, mb_size, NULL, NULL);
+     delete[] u16_tmp;
++#else
++    (void)dst_buf;
++    (void)src_buf;
+ #endif //RECODING_FILENAMES || UTF8_FILESYSTEM, WIN32
+ }
+ 
+diff --git a/Makefile.unittest b/Makefile.unittest
+index 1cc821b..237a50d 100644
+--- a/Makefile.unittest
++++ b/Makefile.unittest
+@@ -11,4 +11,4 @@ endif
+ 
+ .PHONY: check
+ check: $(TARGET)$(EXESUFFIX) test/Makefile
+-	$(MAKE) -C test CXX="$(CXX)" OBJSUFFIX="$(OBJSUFFIX)" EXESUFFIX="$(EXESUFFIX)" LIBSUFFIX="$(LIBSUFFIX)" COVERAGE=$(COVERAGE)
++	$(MAKE) -C test CXX="$(CXX)" DEFS="$(DEFS)" OBJSUFFIX="$(OBJSUFFIX)" EXESUFFIX="$(EXESUFFIX)" LIBSUFFIX="$(LIBSUFFIX)" COVERAGE=$(COVERAGE)
+diff --git a/test/Makefile b/test/Makefile
+index 86e7f7b..d79cfca 100644
+--- a/test/Makefile
++++ b/test/Makefile
+@@ -19,38 +19,68 @@ ifeq (,$(findstring $(VERBOSE),true))
+ Q = @
+ endif
+ 
++ifeq (,$(findstring $(DEFS),-D))
++DEFS += -DUNKNOWN
++endif
++
+ GTEST_DIR=googletest/googletest
+ GTEST_INCDIR=$(GTEST_DIR)/include
+ GMOCK_DIR=googletest/googlemock
+ GMOCK_INCDIR=$(GMOCK_DIR)/include
+ 
++BZIP2_CPPFLAGS=
++
++ifneq (,$(wildcard $(TOPSRC)/extlib/lib/libbz2$(LIBSUFFIX)))
++	BZIP2_CPPFLAGS=-I$(TOPSRC)/extlib/include
++	LIBS_bz2=$(TOPSRC)/extlib/lib/libbz2$(LIBSUFFIX)
++else
++	BZIP2_CPPFLAGS=
++	LIBS_bz2=$(shell pkg-config --libs bzip2 || echo -lbz2)
++endif
++
+ all: test
+ 
+ include Makefile.testlibs
+ 
++
++LIBS_gmock = libgmock$(LIBSUFFIX) libgtest$(LIBSUFFIX)
++
+ .cpp$(OBJSUFFIX):
+-	$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(GTEST_DIR) $(CXXFLAGS) -c $< -o $@
++	$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(GTEST_DIR) $(CXXFLAGS) $(DEFS) -c $< -o $@
+ 
+ .cc$(OBJSUFFIX):
+-	$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(GTEST_DIR) $(CXXFLAGS) -c $< -o $@
++	$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(GTEST_DIR) $(CXXFLAGS) $(DEFS) -c $< -o $@
+ 
+ test_%$(EXESUFFIX): test_%.cpp $(TOPSRC)/%.cpp libgtest$(LIBSUFFIX)
+-	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $^ -o $@
++	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(DEFS) $^ -o $@
+ 	./$@
+ 
+ test_Encoding$(EXESUFFIX): test_Encoding.cpp $(TOPSRC)/Encoding.cpp $(TOPSRC)/sjis2utf16.cpp libgtest$(LIBSUFFIX)
+-	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $^ -o $@
++	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(DEFS) $^ -o $@
+ 	./$@
+ 
+ test_BaseReader$(EXESUFFIX): test_BaseReader.cpp $(TOPSRC)/BaseReader.h libgtest$(LIBSUFFIX)
+-	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $^ -o $@
++	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(DEFS) $^ -o $@
+ 	./$@
+ 
+ test_DirPaths$(EXESUFFIX): test_DirPaths.cpp $(TOPSRC)/DirPaths.cpp libgtest$(LIBSUFFIX)
+-	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $^ -o $@
++	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(DEFS) $^ -o $@
++	./$@
++
++test_DirectReader$(EXESUFFIX): test_DirectReader.cpp $(TOPSRC)/DirectReader.cpp $(TOPSRC)/sjis2utf16.cpp $(LIBS_gmock)
++	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(BZIP2_CPPFLAGS) $(CXXFLAGS) $(DEFS) $^ $(LIBS_bz2) -o $@
++	./$@
++
++test_NsaReader$(EXESUFFIX): test_NsaReader.cpp $(TOPSRC)/NsaReader.cpp $(TOPSRC)/SarReader.cpp $(TOPSRC)/DirectReader.cpp $(TOPSRC)/DirPaths.cpp $(TOPSRC)/sjis2utf16.cpp $(LIBS_gmock)
++	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(BZIP2_CPPFLAGS) $(CXXFLAGS) $(DEFS) $^ $(LIBS_bz2) -o $@
++	./$@
++
++test_SarReader$(EXESUFFIX): test_SarReader.cpp $(TOPSRC)/SarReader.cpp $(TOPSRC)/DirectReader.cpp $(TOPSRC)/sjis2utf16.cpp $(LIBS_gmock)
++	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(BZIP2_CPPFLAGS) $(CXXFLAGS) $(DEFS) $^ $(LIBS_bz2) -o $@
+ 	./$@
+ 
+-TESTEXE := test_Encoding$(EXESUFFIX) test_BaseReader$(EXESUFFIX) test_DirPaths$(EXESUFFIX)
++TESTEXE := test_Encoding$(EXESUFFIX) test_BaseReader$(EXESUFFIX) test_DirPaths$(EXESUFFIX) test_DirectReader$(EXESUFFIX) test_SarReader$(EXESUFFIX)
++#test_NsaReader$(EXESUFFIX)
+ 
+ test: $(TESTEXE)
+ 
