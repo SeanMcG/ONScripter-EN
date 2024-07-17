@@ -19,38 +19,68 @@ ifeq (,$(findstring $(VERBOSE),true))
 Q = @
 endif
 
+ifeq (,$(findstring $(DEFS),-D))
+DEFS += -DUNKNOWN
+endif
+
 GTEST_DIR=googletest/googletest
 GTEST_INCDIR=$(GTEST_DIR)/include
 GMOCK_DIR=googletest/googlemock
 GMOCK_INCDIR=$(GMOCK_DIR)/include
 
+BZIP2_CPPFLAGS=
+
+ifneq (,$(wildcard $(TOPSRC)/extlib/lib/libbz2$(LIBSUFFIX)))
+	BZIP2_CPPFLAGS=-I$(TOPSRC)/extlib/include
+	LIBS_bz2=$(TOPSRC)/extlib/lib/libbz2$(LIBSUFFIX)
+else
+	BZIP2_CPPFLAGS=
+	LIBS_bz2=$(shell pkg-config --libs bzip2 || echo -lbz2)
+endif
+
 all: test
 
 include Makefile.testlibs
 
+
+LIBS_gmock = libgmock$(LIBSUFFIX) libgtest$(LIBSUFFIX)
+
 .cpp$(OBJSUFFIX):
-	$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(GTEST_DIR) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(GTEST_DIR) $(CXXFLAGS) $(DEFS) -c $< -o $@
 
 .cc$(OBJSUFFIX):
-	$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(GTEST_DIR) $(CXXFLAGS) -c $< -o $@
+	$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(GTEST_DIR) $(CXXFLAGS) $(DEFS) -c $< -o $@
 
 test_%$(EXESUFFIX): test_%.cpp $(TOPSRC)/%.cpp libgtest$(LIBSUFFIX)
-	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $^ -o $@
+	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(DEFS) $^ -o $@
 	./$@
 
 test_Encoding$(EXESUFFIX): test_Encoding.cpp $(TOPSRC)/Encoding.cpp $(TOPSRC)/sjis2utf16.cpp libgtest$(LIBSUFFIX)
-	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $^ -o $@
+	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(DEFS) $^ -o $@
 	./$@
 
 test_BaseReader$(EXESUFFIX): test_BaseReader.cpp $(TOPSRC)/BaseReader.h libgtest$(LIBSUFFIX)
-	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $^ -o $@
+	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(DEFS) $^ -o $@
 	./$@
 
 test_DirPaths$(EXESUFFIX): test_DirPaths.cpp $(TOPSRC)/DirPaths.cpp libgtest$(LIBSUFFIX)
-	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $^ -o $@
+	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(DEFS) $^ -o $@
 	./$@
 
-TESTEXE := test_Encoding$(EXESUFFIX) test_BaseReader$(EXESUFFIX) test_DirPaths$(EXESUFFIX)
+test_DirectReader$(EXESUFFIX): test_DirectReader.cpp $(TOPSRC)/DirectReader.cpp $(TOPSRC)/sjis2utf16.cpp $(LIBS_gmock)
+	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(BZIP2_CPPFLAGS) $(CXXFLAGS) $(DEFS) $^ $(LIBS_bz2) -o $@
+	./$@
+
+test_NsaReader$(EXESUFFIX): test_NsaReader.cpp $(TOPSRC)/NsaReader.cpp $(TOPSRC)/SarReader.cpp $(TOPSRC)/DirectReader.cpp $(TOPSRC)/DirPaths.cpp $(TOPSRC)/sjis2utf16.cpp $(LIBS_gmock)
+	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(BZIP2_CPPFLAGS) $(CXXFLAGS) $(DEFS) $^ $(LIBS_bz2) -o $@
+	./$@
+
+test_SarReader$(EXESUFFIX): test_SarReader.cpp $(TOPSRC)/SarReader.cpp $(TOPSRC)/DirectReader.cpp $(TOPSRC)/sjis2utf16.cpp $(LIBS_gmock)
+	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(BZIP2_CPPFLAGS) $(CXXFLAGS) $(DEFS) $^ $(LIBS_bz2) -o $@
+	./$@
+
+TESTEXE := test_Encoding$(EXESUFFIX) test_BaseReader$(EXESUFFIX) test_DirPaths$(EXESUFFIX) test_DirectReader$(EXESUFFIX) test_SarReader$(EXESUFFIX)
+#test_NsaReader$(EXESUFFIX)
 
 test: $(TESTEXE)
 
