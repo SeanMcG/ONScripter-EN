@@ -80,6 +80,7 @@ protected:
         RegisteredCompressionType(){
             ext = NULL;
             next = NULL;
+            type = -1;
         };
         RegisteredCompressionType( const char *ext, int type ){
             this->ext = new char[ strlen(ext)+1 ];

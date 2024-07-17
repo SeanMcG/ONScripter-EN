@@ -47,6 +47,8 @@ SarReader::~SarReader()
 
 int SarReader::open( const char *name )
 {
+	if (name == NULL) return -1;
+
     ArchiveInfo* info = new ArchiveInfo();
 
     if ( (info->file_handle = fopen( name, "rb" ) ) == NULL ){
@@ -497,6 +499,11 @@ size_t SarReader::getFile( const char *file_name, unsigned char *buf, int *locat
 struct SarReader::FileInfo SarReader::getFileByIndex( unsigned int index )
 {
     ArchiveInfo *info = archive_info.next;
+    if ( info == NULL ) {
+        fprintf( stderr, "SarReader::getFileByIndex  archive_info was NULL!\n" );
+        struct SarReader::FileInfo bad;
+        return bad;
+    }
     for ( int i=0 ; i<num_of_sar_archives ; i++ ){
         if ( index < info->num_of_files ) return info->fi_list[index];
         index -= info->num_of_files;

@@ -300,6 +300,12 @@ size_t NsaReader::getFile( const char *file_name, unsigned char *buffer, int *lo
 
 struct NsaReader::FileInfo NsaReader::getFileByIndex( unsigned int index )
 {
+    if ( archive_info.fi_list == NULL ) {
+        fprintf( stderr, "NsaReader::getFileByIndex  archive_info.fi_list was NULL!\n" );
+        struct NsaReader::FileInfo bad;
+        return bad;
+    }
+
     int i;
     
     for ( i=0 ; i<num_of_ns2_archives ; i++ ){
