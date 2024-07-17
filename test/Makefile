@@ -64,7 +64,15 @@ test_DirectReader$(EXESUFFIX): test_DirectReader.cpp $(TOPSRC)/DirectReader.cpp 
 	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(BZIP2_CPPFLAGS) $^ $(LIBS_bz2) -o $@
 	./$@
 
-TESTEXE := test_Encoding$(EXESUFFIX) test_BaseReader$(EXESUFFIX) test_DirPaths$(EXESUFFIX) test_DirectReader$(EXESUFFIX)
+#test_NsaReader$(EXESUFFIX): test_NsaReader.cpp $(TOPSRC)/NsaReader.cpp $(TOPSRC)/SarReader.cpp $(TOPSRC)/DirectReader.cpp $(TOPSRC)/DirPaths.cpp $(TOPSRC)/sjis2utf16.cpp $(LIBS_gmock)
+#	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(BZIP2_CPPFLAGS) $(CXXFLAGS) $(DEFS) $^ $(LIBS_bz2) -o $@
+#	./$@
+
+test_SarReader$(EXESUFFIX): test_SarReader.cpp $(TOPSRC)/SarReader.cpp $(TOPSRC)/DirectReader.cpp $(TOPSRC)/sjis2utf16.cpp $(LIBS_gmock)
+	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(BZIP2_CPPFLAGS) $(CXXFLAGS) $(DEFS) $^ $(LIBS_bz2) -o $@
+	./$@
+
+TESTEXE := test_Encoding$(EXESUFFIX) test_BaseReader$(EXESUFFIX) test_DirPaths$(EXESUFFIX) test_DirectReader$(EXESUFFIX) test_NsaReader$(EXESUFFIX) test_SarReader$(EXESUFFIX)
 
 test: $(TESTEXE)
 
