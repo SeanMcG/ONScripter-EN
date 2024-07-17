@@ -4,6 +4,7 @@ on:
   push:
     branches:
       - master
+      - unittest-io-classes
   pull_request:
     branches:
       - master
@@ -39,4 +40,5 @@ jobs:
     - name: build
       run: |
         NCPUS=$(getconf _NPROCESSORS_ONLN)
-        make -j $NCPUS VERBOSE=true
+        make -j $NCPUS all VERBOSE=true
+        make check VERBOSE=true

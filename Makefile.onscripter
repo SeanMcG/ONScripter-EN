@@ -193,7 +193,7 @@ $(TDIR)sjis2utf16$(OBJSUFFIX): sjis2utf16.cpp
 
 SarReader$(OBJSUFFIX):    $(READER_HEADER) SarReader.h
 NsaReader$(OBJSUFFIX):    $(READER_HEADER) SarReader.h NsaReader.h 
-DirectReader$(OBJSUFFIX): $(READER_HEADER) DirectReader.h
+DirectReader$(OBJSUFFIX): $(READER_HEADER) DirectReader.h PathProvider.h
 ScriptHandler$(OBJSUFFIX): ScriptHandler.h Encoding.h
 ScriptParser$(OBJSUFFIX): $(PARSER_HEADER)
 ScriptParser_command$(OBJSUFFIX): $(PARSER_HEADER)

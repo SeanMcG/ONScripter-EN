@@ -117,9 +117,11 @@ DirectReader::~DirectReader()
     }
 }
 
-bool hasTwoByteChar(const char *str)
+bool hasTwoByteChar(const unsigned char *str)
 {
-    const char *ptr = str;
+    if (str == NULL) return false;
+
+    const unsigned char *ptr = str;
     while (*ptr != 0) {
         if (IS_TWO_BYTE(*ptr) )
             return true;
@@ -319,6 +321,7 @@ unsigned long DirectReader::swapLong( unsigned long ch )
 
 int DirectReader::open( const char *name )
 {
+    (void)name;
     return 0;
 }
 
@@ -367,6 +370,7 @@ int DirectReader::getRegisteredCompressionType( const char *file_name )
     
 struct DirectReader::FileInfo DirectReader::getFileByIndex( unsigned int index )
 {
+    (void)index;
     DirectReader::FileInfo fi;
     memset(&fi, 0, sizeof(DirectReader::FileInfo));
     return fi;
@@ -379,6 +383,9 @@ FILE *DirectReader::getFileHandle( const char *file_name, int &compression_type,
     unsigned int i;
 
     compression_type = NO_COMPRESSION;
+    if (file_name == NULL) {
+        return fp;
+    }
     size_t len = strlen( file_name );
     if ( len > MAX_FILE_NAME_LENGTH ) len = MAX_FILE_NAME_LENGTH;
     memcpy( capital_name, file_name, len );
@@ -541,6 +548,9 @@ void DirectReader::convertFromSJISToUTF8( char *dst_buf, const char *src_buf )
     int mb_size = WideCharToMultiByte(CP_UTF8, 0, u16_tmp, wc_size, dst_buf, 0, NULL, NULL);
     WideCharToMultiByte(CP_UTF8, 0, u16_tmp, wc_size, dst_buf, mb_size, NULL, NULL);
     delete[] u16_tmp;
+#else
+    (void)dst_buf;
+    (void)src_buf;
 #endif //RECODING_FILENAMES || UTF8_FILESYSTEM, WIN32
 }
 
