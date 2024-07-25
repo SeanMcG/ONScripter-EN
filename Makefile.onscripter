@@ -217,7 +217,7 @@ $(TDIR)DirPaths$(OBJSUFFIX): DirPaths.h
 $(TDIR)resize_image$(OBJSUFFIX): resize_image.h
 
 onscripter$(OBJSUFFIX): $(ONSCRIPTER_HEADER) version.h
-ONScripterLabel$(OBJSUFFIX): $(ONSCRIPTER_HEADER) graphics_common.h graphics_cpu.h graphics_resize.h
+ONScripterLabel$(OBJSUFFIX): $(ONSCRIPTER_HEADER) graphics_common.h graphics_cpu.h graphics_resize.h PixelFormat.h PixelFormatAdapter.h
 ONScripterLabel_command$(OBJSUFFIX): $(ONSCRIPTER_HEADER) graphics_common.h graphics_resize.h version.h
 ONScripterLabel_text$(OBJSUFFIX): $(ONSCRIPTER_HEADER) Encoding.h
 ONScripterLabel_effect$(OBJSUFFIX): $(ONSCRIPTER_HEADER)
