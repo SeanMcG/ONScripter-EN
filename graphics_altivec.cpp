@@ -33,6 +33,7 @@
 #endif
 
 #include "graphics_sum.h"
+#include "graphics_altivec.h"
 
 namespace ons_gfx {
 
@@ -114,6 +115,11 @@ void imageFilterSubFrom_Altivec(unsigned char *dst, unsigned char *src, int leng
     // If any bytes are left over, deal with them individually
     ++n;
     BASIC_SUBFROM();
+}
+
+void dtw_func_Altivec(AnimationInfo::ONSBuf *buf, const ONSPixel::PixelFormat fmt, ONSrect &rect, int color[], const int w)
+{
+    // TODO implement
 }
 
 }//namespace ons_gfx

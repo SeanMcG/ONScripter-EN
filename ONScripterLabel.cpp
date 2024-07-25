@@ -40,6 +40,10 @@
 
 #include "ONScripterLabel.h"
 #include "ONScripterReporter.h"
+#include "ONSrect.h"
+#include "ONSrectAdapter.h"
+#include "PixelFormat.h"
+#include "PixelFormatAdapter.h"
 #include "graphics_cpu.h"
 #include "graphics_resize.h"
 #include <cstdio>
@@ -76,6 +80,10 @@ typedef HINSTANCE (WINAPI *ShellExecuteA_t)(HWND, LPCSTR, LPCSTR, LPCSTR, LPCSTR
 #endif
 #if !defined(WIN32) && !defined(MACOSX)
 #include "resources.h"
+#endif
+
+#ifdef USE_PPC_GFX
+#include "graphics_altivec.h"
 #endif
 
 extern void initSJIS2UTF16();
@@ -369,6 +377,18 @@ static struct FuncHash{
 static void SDL_Quit_Wrapper()
 {
     SDL_Quit();
+}
+
+static void dtw_func_c(AnimationInfo::ONSBuf *buf, const ONSPixel::PixelFormat fmt, ONSrect &rect, int color[], const int w)
+{
+    for ( int i=rect.y ; i<rect.y + rect.h ; i++ ) {
+        for ( int j=rect.x ; j<rect.x + rect.w ; j++, buf++ ){
+            *buf = (((*buf & fmt.Rmask) >> fmt.Rshift) * color[0] >> 8) << fmt.Rshift |
+                (((*buf & fmt.Gmask) >> fmt.Gshift) * color[1] >> 8) << fmt.Gshift |
+                (((*buf & fmt.Bmask) >> fmt.Bshift) * color[2] >> 8) << fmt.Bshift;
+        }
+        buf += w - rect.w;
+    }
 }
 
 void ONScripterLabel::initSDL()
@@ -686,6 +706,14 @@ ONScripterLabel::ONScripterLabel()
     fullscreen_mode = false;
     volume_on_flag = true;
     text_speed_no = 1;
+    dtw_func = new onslabel_dsp::dtw_func;
+
+#ifdef USE_PPC_GFX
+    dtw_func->func = ons_gfx::dtw_func_Altivec;
+#else
+    dtw_func->func = ::dtw_func_c; // TODO register additional accelerated versions
+#endif
+
     cdaudio_on_flag = false;
     automode_time = 1000;
 
@@ -849,6 +877,8 @@ ONScripterLabel::~ONScripterLabel()
 
     if (default_font) delete[] default_font;
     if (font_file) delete[] font_file;
+
+    delete dtw_func;
 }
 
 void ONScripterLabel::enableCDAudio(){
@@ -2323,19 +2353,19 @@ void ONScripterLabel::displayTextWindow( SDL_Surface *surface, SDL_Rect &clip )
         ONSBuf *buf = (ONSBuf *)surface->pixels + rect.y * surface->w + rect.x;
 
         SDL_PixelFormat *fmt = surface->format;
-        int color[3];
+
+        #define ONS_FONT_COLORS 3
+
+        int color[ONS_FONT_COLORS];
         color[0] = current_font->window_color[0] + 1;
         color[1] = current_font->window_color[1] + 1;
         color[2] = current_font->window_color[2] + 1;
 
-        for ( int i=rect.y ; i<rect.y + rect.h ; i++ ){
-            for ( int j=rect.x ; j<rect.x + rect.w ; j++, buf++ ){
-                *buf = (((*buf & fmt->Rmask) >> fmt->Rshift) * color[0] >> 8) << fmt->Rshift |
-                    (((*buf & fmt->Gmask) >> fmt->Gshift) * color[1] >> 8) << fmt->Gshift |
-                    (((*buf & fmt->Bmask) >> fmt->Bshift) * color[2] >> 8) << fmt->Bshift;
-            }
-            buf += surface->w - rect.w;
-        }
+    // OPEN QUESTIONS:
+    // - is surface->pixels aligned to 16-byte boundaries? if not, can it be?
+        ONSPixel::PixelFormat onsfmt = ONSPixel::PixelFormatAdapter(*fmt);
+        ONSrect onsrect = ONSrectAdapter(rect);
+        dtw_func->func(buf, onsfmt, onsrect, color, surface->w);
 
         SDL_UnlockSurface( surface );
     }
@@ -2675,4 +2705,3 @@ int ONScripterLabel::getNumberFromBuffer( const char **buf )
 
     return ret;
 }
-
