@@ -26,6 +26,11 @@
 #define __GRAPHICS_SSE2_H__
 
 #ifdef USE_X86_GFX
+
+#include "AnimationInfo.h"
+#include "ONSrect.h"
+#include "PixelFormat.h"
+
 namespace ons_gfx {
 
 int imageFilterMean_SSE2(unsigned char *src1, unsigned char *src2, unsigned char *dst, int length);
@@ -35,6 +40,7 @@ int imageFilterBlend_SSE2(Uint32 *dst_buffer, Uint32 *src_buffer, Uint8 *alphap,
 int imageFilterEffectBlend_SSE2(Uint32 *dst_buffer, Uint32 *src1_buffer, Uint32 *src2_buffer, Uint32 mask2, int length);
 int imageFilterEffectMaskBlend_SSE2(Uint32 *dst_buffer, Uint32 *src1_buffer, Uint32 *src2_buffer, Uint32 *mask_buffer, Uint32 is_crossfade, Uint32 mask_value, int length);
 
+int dtw_func_SSE2(AnimationInfo::ONSBuf *buf, const ONSPixel::PixelFormat fmt, ONSrect& rect, int color[], const int w);
 }
 #endif //USE_X86_GFX
 
