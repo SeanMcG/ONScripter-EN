@@ -37,6 +37,10 @@
 #include "graphics_sum.h"
 #include "graphics_blend.h"
 
+#include "AnimationInfo.h"
+#include "ONSrect.h"
+#include "PixelFormat.h"
+
 namespace ons_gfx {
 
 int imageFilterMean_SSE2(unsigned char *src1, unsigned char *src2, unsigned char *dst, int length)
@@ -279,6 +283,10 @@ int imageFilterEffectMaskBlend_SSE2(Uint32 *dst_buffer, Uint32 *src1_buffer, Uin
     }
 
     return length - n;
+}
+
+int dtw_func_SSE2(AnimationInfo::ONSBuf *buf, const ONSPixel::PixelFormat fmt, ONSrect &rect, int color[], const int w) {
+    return -1; // TODO implement
 }
 
 }//namespace ons_gfx

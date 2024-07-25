@@ -43,9 +43,12 @@
 #ifndef __ONSCRIPTER_LABEL_H__
 #define __ONSCRIPTER_LABEL_H__
 
+#include "AnimationInfo.h"
 #include "DirPaths.h"
 #include "ScriptParser.h"
 #include "DirtyRect.h"
+#include "ONSrect.h"
+#include "PixelFormat.h"
 #include <SDL.h>
 #include <SDL_image.h>
 #include <SDL_ttf.h>
@@ -102,6 +105,12 @@
 #define KEYPRESS_NULL ((SDLKey)(SDLK_LAST+1)) // "null" for keypress variables
 
 void clearTimer(SDL_TimerID &timer_id);
+
+namespace onslabel_dsp {
+    typedef struct dtw_func {
+        int (*func)(AnimationInfo::ONSBuf*, const ONSPixel::PixelFormat, ONSrect&, int color[], const int w);
+    } dtw_func;
+}
 
 class ONScripterLabel : public ScriptParser
 {
@@ -1052,6 +1061,7 @@ private:
     TTF_Font *text_font;
     bool new_line_skip_flag;
     int text_speed_no;
+    onslabel_dsp::dtw_func *dtw_func;
 
     void displayTextWindow( SDL_Surface *surface, SDL_Rect &clip );
     void clearCurrentPage();
