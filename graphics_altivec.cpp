@@ -116,6 +116,11 @@ void imageFilterSubFrom_Altivec(unsigned char *dst, unsigned char *src, int leng
     BASIC_SUBFROM();
 }
 
+void dtw_func_Altivec(AnimationInfo::ONSBuf *buf, const ONSPixel::PixelFormat fmt, ONSrect &rect, int color[], const int w)
+{
+    // TODO implement
+}
+
 }//namespace ons_gfx
 
 #endif //USE_PPC_GFX
