@@ -26,11 +26,18 @@
 #define __GRAPHICS_ALTIVEC_H__
 
 #ifdef USE_PPC_GFX
+
+#include "AnimationInfo.h"
+#include "ONSrect.h"
+#include "PixelFormat.h"
+
 namespace ons_gfx {
 
 void imageFilterMean_Altivec(unsigned char *src1, unsigned char *src2, unsigned char *dst, int length);
 void imageFilterAddTo_Altivec(unsigned char *dst, unsigned char *src, int length);
 void imageFilterSubFrom_Altivec(unsigned char *dst, unsigned char *src, int length);
+
+void dtw_func_Altivec(AnimationInfo::ONSBuf *buf, const ONSPixel::PixelFormat fmt, ONSrect &rect, int color[], const int w);
 
 }
 #endif //USE_PPC_GFX
