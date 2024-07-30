@@ -1,2 +1,3 @@
 obey-destdir.patch
 install-tools.patch
+obey-cxxflags.patch

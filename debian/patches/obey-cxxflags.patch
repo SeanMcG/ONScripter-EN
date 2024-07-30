@@ -1,0 +1,100 @@
+build: obey CXXFLAGS
+--- a/Makefile.onscripter
++++ b/Makefile.onscripter
+@@ -147,49 +147,49 @@
+ 
+ 
+ $(TDIR)sardec$(OBJSUFFIX): $(TDIR)arcdec.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DSAR $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DSAR $<
+ 
+ $(TDIR)nsadec$(OBJSUFFIX): $(TDIR)arcdec.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DNSA $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DNSA $<
+ 
+ $(TDIR)ns2dec$(OBJSUFFIX): $(TDIR)arcdec.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DNS2 $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DNS2 $<
+ 
+ $(TDIR)sarconv$(OBJSUFFIX): $(TDIR)arcconv.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DSAR $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DSAR $<
+ 
+ $(TDIR)nsaconv$(OBJSUFFIX): $(TDIR)arcconv.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DNSA $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DNSA $<
+ 
+ $(TDIR)ns2conv$(OBJSUFFIX): $(TDIR)arcconv.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DNS2 $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DNS2 $<
+ 
+ $(TDIR)sarmake$(OBJSUFFIX): $(TDIR)arcmake.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DSAR $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DSAR $<
+ 
+ $(TDIR)nsamake$(OBJSUFFIX): $(TDIR)arcmake.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DNSA $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DNSA $<
+ 
+ $(TDIR)ns2make$(OBJSUFFIX): $(TDIR)arcmake.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DNS2 $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) -DNS2 $<
+ 
+ $(TDIR)%$(OBJSUFFIX): $(TDIR)%.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) $<
+ 
+ $(TDIR)%Reader$(OBJSUFFIX): %Reader.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) $<
+ 
+ $(TDIR)DirPaths$(OBJSUFFIX): DirPaths.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) $<
+ 
+ $(TDIR)resize_image$(OBJSUFFIX): resize_image.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) $<
+ 
+ $(TDIR)sjis2utf16$(OBJSUFFIX): sjis2utf16.cpp
+-	$(CXX) -c -o $@ $(CXXSTD) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) $<
++	$(CXX) -c -o $@ $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(TOOL_INCS) $(TOOL_DEFS) $<
+ 
+ .cpp$(OBJSUFFIX):
+-	$(CXX) -c $(CXXSTD) $(OSCFLAGS) $(INCS) $(DEFS) $<
++	$(CXX) -c $(CXXSTD) $(CXXFLAGS) $(OSCFLAGS) $(INCS) $(DEFS) $<
+ 
+ SarReader$(OBJSUFFIX):    $(READER_HEADER) SarReader.h
+ NsaReader$(OBJSUFFIX):    $(READER_HEADER) SarReader.h NsaReader.h 
+--- a/configure
++++ b/configure
+@@ -1112,7 +1112,7 @@
+ 	./embed$EXE \$(patsubst =%,%,\$(RESOURCES)) > \$@
+ 
+ embed$EXE: embed.cpp
+-	\$(CXX) \$(CXXSTD) \$< -o \$@
++	\$(CXX) \$(CXXSTD) \$(CXXFLAGS) \$< -o \$@
+ _EOF
+ fi
+ 
+@@ -1179,17 +1179,17 @@
+ cat >> Makefile <<_EOF
+ 
+ graphics_sse2.o: graphics_sse2.cpp graphics_sse2.h graphics_common.h graphics_sum.h graphics_blend.h
+-	\$(CXX) \$(CXXSTD) \$(OSCFLAGS) \$(INCS) \$(DEFS) $GFX_SSE2_FLAGS -c \$< -o \$@
++	\$(CXX) \$(CXXSTD) \$(CXXFLAGS) \$(OSCFLAGS) \$(INCS) \$(DEFS) $GFX_SSE2_FLAGS -c \$< -o \$@
+ 
+ graphics_mmx.o: graphics_mmx.cpp graphics_mmx.h graphics_common.h graphics_sum.h
+-	\$(CXX) \$(CXXSTD) \$(OSCFLAGS) \$(INCS) \$(DEFS) $GFX_MMX_FLAGS -c \$< -o \$@
++	\$(CXX) \$(CXXSTD) \$(CXXFLAGS) \$(OSCFLAGS) \$(INCS) \$(DEFS) $GFX_MMX_FLAGS -c \$< -o \$@
+ _EOF
+ elif $USE_PPC_GFX
+ then
+ cat >> Makefile <<_EOF
+ 
+ graphics_maltivec.o: graphics_maltivec.cpp graphics_maltivec.h graphics_common.h graphics_sum.h
+-	\$(CXX) \$(CXXSTD) \$(OSCFLAGS) \$(INCS) \$(DEFS) $GFX_MALTIVEC_FLAGS -c \$< -o \$@
++	\$(CXX) \$(CXXSTD) \$(CXXFLAGS) \$(OSCFLAGS) \$(INCS) \$(DEFS) $GFX_MALTIVEC_FLAGS -c \$< -o \$@
+ _EOF
+ fi
+ 
