@@ -1,0 +1,23 @@
+build: fix OSCFLAGS for Debian packaging
+--- a/configure
++++ b/configure
+@@ -1067,17 +1067,8 @@
+ .SUFFIXES:
+ .SUFFIXES: $OBJ .cpp .h .c
+ 
+-ifdef DEBUG
+-OSCFLAGS = -O0 -g -pg -ggdb -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
+-export LDFLAGS  := -pg \$(LDFLAGS)
+-else
+-  ifdef PROF
+-  OSCFLAGS = -O2 -pg -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
+-  export LDFLAGS  := -pg \$(LDFLAGS)
+-  else
+-  OSCFLAGS = -O2 -fomit-frame-pointer -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
+-  endif
+-endif
++# NOTE: '-g' to get -dbgsym packages, '-O2' implies '-fomit-frame-pointer'
++OSCFLAGS = -O2 -g -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
+ 
+ TARGET ?= onscripter-en
+ 
