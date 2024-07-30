@@ -2,3 +2,4 @@ obey-destdir.patch
 install-tools.patch
 obey-cxxflags.patch
 oscflags.patch
+do-not-strip.patch
