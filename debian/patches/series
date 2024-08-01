@@ -3,3 +3,4 @@ install-tools.patch
 obey-cxxflags.patch
 oscflags.patch
 do-not-strip.patch
+internal-png-zlib.patch
