@@ -51,11 +51,19 @@ clean_sdl:
 dclean_sdl: clean_sdl
 	@if [ -f $(SDLSRC)/Makefile ]; then $(MAKE) -C $(SDLSRC) distclean; fi
 
+# NOTE the result of 'uname -m' is inappropriate if this is a cross-compile
+CANONICAL_GNU_CONFIG := $$($(TOPSRC)/config.sub $$(uname -m) || echo unknown)
+
+SDL_VIDEO_DISABLE =
+ifneq (,$(findstring powerpc,$(CANONICAL_GNU_CONFIG)))
+SDL_VIDEO_DISABLE += altivec
+endif
+
 $(SDLSRC)/Makefile: $(if $(INTERNAL_LIBPNG),$(EL)/libpng$(LIBSUFFIX))
 	@echo Configuring internal SDL...
 	@cd $(SDLSRC) && \
 	./configure --prefix="$(LPREFIX)" $(SDLOTHERCONFIG) \
-	    $(addprefix --disable-,shared joystick nas $(addprefix video-,fbcon directfb svga vgl wscons opengl)) \
+	    $(addprefix --disable-,shared joystick nas $(addprefix video-,fbcon directfb svga vgl wscons opengl ps3 $(SDL_VIDEO_DISABLE))) \
 	    $(REDIR)
 	@cp $(ES)/required/libtool $(SDLSRC)/libtool # This line fixes a libtool issue by just using the copy of libtool from the old build of ONSCripter-EN. It's not pretty, but it works. -Galladite, 2022-2-9
 	@sed -i '/^$$(objects)\/SDL_dummy_main/s/\.lo/\.o/' $(SDLSRC)/build-deps # This line fixes an issue baked into SDL's configure.in whereby the wrong extension was given, changing the name of a critically important target. These extensions are given out in a generic manner, however, so I'd rather do this than try and understand whatever autoconf is doing. -Galladite, 2022-2-9
