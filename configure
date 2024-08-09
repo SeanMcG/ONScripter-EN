@@ -1320,6 +1320,7 @@ cat >> Makefile <<_EOF
 
 include Makefile.extlibs
 include Makefile.onscripter
+include Makefile.dsp
 include Makefile.unittest
 
 .PHONY: libtoolreplace
@@ -1371,26 +1372,6 @@ clean_libgnurx:
 
 _EOF
 fi
-
-if $USE_X86_GFX
-then
-cat >> Makefile <<_EOF
-
-graphics_sse2.o: graphics_sse2.cpp graphics_sse2.h graphics_common.h graphics_sum.h graphics_blend.h
-	\$(CXX) \$(CXXSTD) \$(OSCFLAGS) \$(INCS) \$(DEPFLAGS) \$(DEFS) $GFX_SSE2_FLAGS -c \$< -o \$@
-
-graphics_mmx.o: graphics_mmx.cpp graphics_mmx.h graphics_common.h graphics_sum.h
-	\$(CXX) \$(CXXSTD) \$(OSCFLAGS) \$(INCS) \$(DEPFLAGS) \$(DEFS) $GFX_MMX_FLAGS -c \$< -o \$@
-_EOF
-elif $USE_PPC_GFX
-then
-cat >> Makefile <<_EOF
-
-graphics_altivec.o: graphics_altivec.cpp graphics_altivec.h graphics_common.h graphics_sum.h
-	\$(CXX) \$(CXXSTD) \$(OSCFLAGS) \$(INCS) \$(DEPFLAGS) \$(DEFS) $GFX_MALTIVEC_FLAGS -c \$< -o \$@
-_EOF
-fi
-
 
 cat >> Makefile <<_EOF
 
