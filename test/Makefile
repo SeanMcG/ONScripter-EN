@@ -34,6 +34,23 @@ GTEST_INCDIR=$(GTEST_DIR)/include
 GMOCK_DIR=googletest/googlemock
 GMOCK_INCDIR=$(GMOCK_DIR)/include
 
+ONS_SDL_CPPFLAGS=
+LIBS_sdl=
+LIBS_sdlttf=
+
+ifneq (,$(wildcard $(TOPSRC)/extlib/lib/libSDL$(LIBSUFFIX)))
+       ONS_SDL_CPPFLAGS=-I$(TOPSRC)/extlib/include
+       LIBS_sdl=$(TOPSRC)/extlib/lib/libSDL$(LIBSUFFIX)
+else
+       LIBS_sdl=$(shell pkg-config --libs sdl)
+endif
+
+ifneq (,$(wildcard $(TOPSRC)/extlib/lib/libSDL_ttf$(LIBSUFFIX)))
+       LIBS_sdlttf=$(TOPSRC)/extlib/lib/libSDL_ttf$(LIBSUFFIX)
+else
+       LIBS_sdlttf=$(shell pkg-config --libs SDL_ttf)
+endif
+
 all: test
 
 include Makefile.testlibs
@@ -64,7 +81,20 @@ test_DirectReader$(EXESUFFIX): test_DirectReader.cpp $(TOPSRC)/DirectReader.cpp 
 	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(BZIP2_CPPFLAGS) $^ $(LIBS_bz2) -o $@
 	./$@
 
-TESTEXE := test_Encoding$(EXESUFFIX) test_BaseReader$(EXESUFFIX) test_DirPaths$(EXESUFFIX) test_DirectReader$(EXESUFFIX)
+test_DirtyRect$(EXESUFFIX): test_DirtyRect.cpp $(TOPSRC)/DirtyRect.cpp libgtest$(LIBSUFFIX)
+	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(ONS_SDL_CPPFLAGS) $^ $(LIBS_sdl) -o $@
+	./$@
+
+# TODO needs FontContfig, X11, possibly other libs
+test_FontInfo$(EXESUFFIX): test_FontInfo.cpp $(TOPSRC)/FontInfo.cpp libgtest$(LIBSUFFIX)
+	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(ONS_SDL_CPPFLAGS) $^ $(LIBS_sdlttf) $(LIBS_sdl) -o $@
+	./$@
+
+test_ScriptHandler$(EXESUFFIX): test_ScriptHandler.cpp $(TOPSRC)/ScriptHandler.cpp $(TOPSRC)/Encoding.cpp $(TOPSRC)/sjis2utf16.cpp $(TOPSRC)/DirPaths.cpp libgtest$(LIBSUFFIX) libgmock$(LIBSUFFIX)
+	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(ONS_SDL_CPPFLAGS) $^ -o $@
+	./$@
+
+TESTEXE := test_Encoding$(EXESUFFIX) test_BaseReader$(EXESUFFIX) test_DirPaths$(EXESUFFIX) test_DirectReader$(EXESUFFIX) test_DirtyRect$(EXESUFFIX) test_ScriptHandler$(EXESUFFIX) #test_FontInfo$(EXESUFFIX)
 
 test: $(TESTEXE)
 
