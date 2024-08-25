@@ -1158,6 +1158,7 @@ export CXXSTD   := $CXXSTD
 
 export CC      := $CC
 export CXX     := $CXX
+export LD      := $CXX
 export MAKE    := $MAKE
 export GNUMAKE := $MAKE
 export AR      := $AR
