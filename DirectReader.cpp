@@ -117,9 +117,11 @@ DirectReader::~DirectReader()
     }
 }
 
-bool hasTwoByteChar(const char *str)
+bool hasTwoByteChar(const unsigned char *str)
 {
-    const char *ptr = str;
+    if (str == NULL) return false;
+
+    const unsigned char *ptr = str;
     while (*ptr != 0) {
         if (IS_TWO_BYTE(*ptr) )
             return true;
@@ -378,6 +380,10 @@ FILE *DirectReader::getFileHandle( const char *file_name, int &compression_type,
     FILE *fp = NULL;
     unsigned int i;
 
+    if (file_name == NULL) {
+        return fp;
+    }
+
     compression_type = NO_COMPRESSION;
     size_t len = strlen( file_name );
     if ( len > MAX_FILE_NAME_LENGTH ) len = MAX_FILE_NAME_LENGTH;
@@ -436,6 +442,8 @@ FILE *DirectReader::getFileHandle( const char *file_name, int &compression_type,
 
 size_t DirectReader::getFileLength( const char *file_name )
 {
+    if (file_name == NULL || strlen(file_name) == 0) return 0;
+
     int compression_type;
     size_t len;
     FILE *fp = getFileHandle( file_name, compression_type, &len );

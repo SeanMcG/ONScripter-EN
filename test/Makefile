@@ -19,6 +19,16 @@ ifeq (,$(findstring $(VERBOSE),true))
 Q = @
 endif
 
+BZIP2_CPPFLAGS=
+
+ifneq (,$(wildcard $(TOPSRC)/extlib/lib/libbz2$(LIBSUFFIX)))
+	BZIP2_CPPFLAGS=-I$(TOPSRC)/extlib/include
+	LIBS_bz2=$(TOPSRC)/extlib/lib/libbz2$(LIBSUFFIX)
+else
+	BZIP2_CPPFLAGS=
+	LIBS_bz2=$(shell pkg-config --libs bzip2 || echo -lbz2)
+endif
+
 GTEST_DIR=googletest/googletest
 GTEST_INCDIR=$(GTEST_DIR)/include
 GMOCK_DIR=googletest/googlemock
@@ -50,7 +60,11 @@ test_DirPaths$(EXESUFFIX): test_DirPaths.cpp $(TOPSRC)/DirPaths.cpp libgtest$(LI
 	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $^ -o $@
 	./$@
 
-TESTEXE := test_Encoding$(EXESUFFIX) test_BaseReader$(EXESUFFIX) test_DirPaths$(EXESUFFIX)
+test_DirectReader$(EXESUFFIX): test_DirectReader.cpp $(TOPSRC)/DirectReader.cpp libgtest$(LIBSUFFIX) libgmock$(LIBSUFFIX)
+	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(BZIP2_CPPFLAGS) $^ $(LIBS_bz2) -o $@
+	./$@
+
+TESTEXE := test_Encoding$(EXESUFFIX) test_BaseReader$(EXESUFFIX) test_DirPaths$(EXESUFFIX) test_DirectReader$(EXESUFFIX)
 
 test: $(TESTEXE)
 
