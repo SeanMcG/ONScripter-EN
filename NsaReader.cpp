@@ -67,7 +67,10 @@ int NsaReader::processArchives( const PathProvider &provider )
 {
     int i,j,k,n,nd;
     FILE *fp;
-    char archive_name[256], archive_name2[256];
+    char *archive_name, *archive_name2;
+
+    archive_name = new char[16]; // LIKELY TOO SMALL -- re-allocate as necessary
+    archive_name2 = new char[256];
 
     if ( !SarReader::open( "arc.sar" ) ) {
         sar_flag = true;
@@ -144,6 +147,10 @@ int NsaReader::processArchives( const PathProvider &provider )
             n++;
         }
     }
+
+    // TODO both of these still need to be deleted if an exception occurs
+    if (archive_name) delete[] archive_name;
+    if (archive_name2) delete[] archive_name2;
 
     if ((i < 0) && (k < 0)) {
         // didn't find any (main) archive files
