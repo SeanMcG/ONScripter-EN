@@ -49,6 +49,7 @@ int SarReader::open( const char *name )
 {
     if (name == NULL || strlen(name) == 0) return -1;
 
+    int result = 0;
     ArchiveInfo* info = new ArchiveInfo();
 
     if ( (info->file_handle = fopen( name, "rb" ) ) == NULL ){
@@ -59,13 +60,13 @@ int SarReader::open( const char *name )
     info->file_name = new char[strlen(name)+1];
     memcpy(info->file_name, name, strlen(name)+1);
     
-    readArchive( info );
+    result = readArchive( info );
 
     last_archive_info->next = info;
     last_archive_info = last_archive_info->next;
-    num_of_sar_archives++;
+    if (result != -1) num_of_sar_archives++;
 
-    return 0;
+    return result;
 }
 
 #ifdef TOOLS_BUILD
@@ -144,6 +145,9 @@ int SarReader::readArchive( struct ArchiveInfo *ai, int archive_type, int offset
             cur_offset += 4;
             ai->num_of_files++;
         }
+        if (ai->num_of_files == 0) {
+            return -1;
+        }
         ai->fi_list = new struct FileInfo[ ai->num_of_files ];
 
         // now go back to the beginning and read the file info
@@ -174,6 +178,9 @@ int SarReader::readArchive( struct ArchiveInfo *ai, int archive_type, int offset
         // start (4byte), length (4byte))
     } else {
         ai->num_of_files = readShort( ai->file_handle );
+        if (ai->num_of_files == 0) {
+            return -1;
+        }
         ai->fi_list = new struct FileInfo[ ai->num_of_files ];
 
         ai->base_offset = readLong( ai->file_handle );
