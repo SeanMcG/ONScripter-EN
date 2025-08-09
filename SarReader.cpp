@@ -498,8 +498,8 @@ size_t SarReader::getFile( const char *file_name, unsigned char *buf, int *locat
         if ( (j = getFileSub( info, file_name, buf )) > 0 ) break;
         info = info->next;
     }
-    if ( location ) *location = ARCHIVE_TYPE_SAR;
-    
+    if ( location && info != NULL && j != 0 ) *location = ARCHIVE_TYPE_SAR;
+
     return j;
 }
 
