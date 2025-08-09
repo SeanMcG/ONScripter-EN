@@ -64,8 +64,9 @@ test_DirectReader$(EXESUFFIX): test_DirectReader.cpp $(TOPSRC)/DirectReader.cpp 
 	$(Q)$(CXX) $(CXXSTD) -isystem $(GTEST_INCDIR) -isystem $(GMOCK_INCDIR) -I$(TOPSRC) $(CXXFLAGS) $(BZIP2_CPPFLAGS) $^ $(LIBS_bz2) -o $@
 	./$@
 
-TESTSAR := arc.sar
-TESTSAR_DIR := testsar
+# NOTE $(TMPDIR) can be and often is empty
+TESTSAR := $(TMPDIR)/arc.sar
+TESTSAR_DIR := $(TMPDIR)/testsar
 CLEAN_TEST += $(TESTSAR)
 $(TESTSAR): $(TOPSRC)/ons-en.png
 	$(Q)$(RM) $(TESTSAR)
