@@ -108,13 +108,11 @@ TEST_F (SarFile, OpenAndCloseInvalidSar) {
 }
 
 TEST_F (SarFile, OpenAndCloseRealSar) {
-  char *path = new char[PATH_MAX];
-  ::getcwd(path, PATH_MAX - 1);
   EXPECT_CALL(provider, max_path_len()).Times(testing::AtLeast(1)).WillRepeatedly(testing::Return(MAX_PATH_LEN));
   EXPECT_CALL(provider, get_num_paths()).Times(testing::AtLeast(1)).WillRepeatedly(testing::Return(PATH_COUNT));
   EXPECT_CALL(provider, get_path(testing::Le(PATH_COUNT))).Times(testing::AtLeast(1)).WillRepeatedly(testing::Return(tmp));
   SarReader sr(provider, NULL);
-  sprintf(path, "%s%s%s", path, "/", "arc.sar"); /* NOTE path separator of '/' is incorrect on Windows */
+  sprintf(path, "%s%s%s", tmp, "/", "arc.sar"); /* NOTE path separator of '/' is incorrect on Windows */
   ASSERT_EQ(1u, sr.open(path));
   ASSERT_EQ(0u, sr.close());
 }
