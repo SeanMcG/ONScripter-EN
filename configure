@@ -37,6 +37,7 @@ FASTMATH=-ffast-math
 WERROR=""
 CXXSTD="-std=c++98"
 STRICT=
+STACKPROTECT=
 INTERNAL_LIBS=false
 INTERNAL_SDL=false
 INTERNAL_SDL_IMAGE=false
@@ -106,6 +107,8 @@ do
       --no-werror | -no-werror)
         WERROR=""
         ;;
+      --hardened)
+        STACKPROTECT="-fstack-protector-strong" ;;
       --unsupported-compiler | -unsupported-compiler)
         UNSUPPORTED_COMPILER=true ;;
       --unsupported-compiler=* | -unsupported-compiler=*)
@@ -500,7 +503,7 @@ g++|clang++|intel++) DEPFLAGS="-MMD -MF \$(@:.o=.d) -MT \$@" ;;
 esac
 
 case "$CXX_TYPE" in
-g++) CFLAGSEXTRA=-Wall ;;
+g++) CFLAGSEXTRA="-Wall -Wno-unused-variable -Wno-unused-but-set-variable -Wno-unused-function -Wno-write-strings -Wno-misleading-indentation -Wno-int-in-bool-context -Wno-class-memaccess -Wno-narrowing" ;;
 esac
 
 # compiler sanitization support
@@ -1251,7 +1254,7 @@ LIBS = $X11_LIBS -Lextlib/lib \\
        $LINKSDL_ttf \$(shell $FREETYPE_CONFIG --libs) \\
        $LINKbz2 \$(if \$(findstring true,$INTERNAL_SDL),$INTERNAL_LDFLAGS)
 
-DEFS = -DLINUX -DUSE_OGG_VORBIS -D_FILE_OFFSET_BITS=64 -D_TIME_BITS=64 $EXTRA_DEPS
+DEFS = -DLINUX -DUSE_OGG_VORBIS -D_FILE_OFFSET_BITS=64 -D_TIME_BITS=64 -D_FORTIFY_SOURCE=2 $EXTRA_DEPS
 EXT_OBJS = $GFX_EXT_OBJS
 _EOF
 ;; esac
@@ -1275,7 +1278,7 @@ else
   OSCFLAGS = -O2 -pg -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA)
   export LDFLAGS  := -pg \$(LDFLAGS)
   else
-  OSCFLAGS = -O2 -fomit-frame-pointer -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA) \$(SANFLAGS)
+  OSCFLAGS = -O2 -fomit-frame-pointer $STACKPROTECT -pipe -Wpointer-arith $WERROR $STRICT \$(OSCFLAGSEXTRA) \$(SANFLAGS)
   endif
 endif
 
