@@ -5,6 +5,8 @@
 #include "gtest/gtest.h"
 #include "gmock/gmock.h"
 
+// TODO duplicate temporary file fixture from test_SarReader
+
 class MockPathProvider : public PathProvider
 {
 public:
