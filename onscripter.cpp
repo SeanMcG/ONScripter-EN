@@ -91,8 +91,6 @@ static void optionHelp()
     printf( "      --force-button-shortcut\tignore useescspc and getenter command\n");
 #ifdef USE_X86_GFX
     printf( "      --disable-cpu-gfx\tdo not use MMX/SSE2 graphics acceleration routines\n");
-#elif  USE_PPC_GFX
-    printf( "      --disable-cpu-gfx\tdo not use Altivec graphics acceleration routines\n");
 #endif
     printf( "      --automode-time time\tdefault time at clickwaits before continuing, when in automode\n");
     printf( "      --enable-wheeldown-advance\tadvance the text on mouse wheeldown event\n");
@@ -262,7 +260,7 @@ static void parseOptions(int argc, char **argv, ONScripterLabel &ons, bool &hasA
             else if ( !strcmp( argv[0]+1, "-debug" ) ){
                 ons.add_debug_level();
             }
-#if defined (USE_X86_GFX) || defined(USE_PPC_GFX)
+#if defined (USE_X86_GFX)
             else if ( !strcmp( argv[0]+1, "-disable-cpu-gfx" ) ){
                 ons.disableCpuGfx();
                 printf("disabling CPU accelerated graphics routines\n");

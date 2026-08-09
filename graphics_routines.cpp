@@ -33,10 +33,6 @@
 #include "graphics_sse2.h"
 #endif
 
-#if defined(USE_PPC_GFX)
-#include "graphics_altivec.h"
-#endif
-
 #include "resize_image.h"
 
 namespace ons_gfx {
@@ -57,14 +53,7 @@ unsigned int getCpufuncs()
 #ifndef BPP16 // currently none of the fast CPU routines support 16bpp
 void imageFilterMean(unsigned char *src1, unsigned char *src2, unsigned char *dst, int length)
 {
-#if defined(USE_PPC_GFX)
-    if(cpufuncs & CPUF_PPC_ALTIVEC) {
-        imageFilterMean_Altivec(src1, src2, dst, length);
-    } else {
-        int n = length + 1;
-        BASIC_MEAN();
-    }
-#elif defined(USE_X86_GFX)
+#if defined(USE_X86_GFX)
 
 #ifndef MACOSX
     if (cpufuncs & CPUF_X86_SSE2) {
@@ -91,14 +80,7 @@ void imageFilterMean(unsigned char *src1, unsigned char *src2, unsigned char *ds
 
 void imageFilterAddTo(unsigned char *dst, unsigned char *src, int length)
 {
-#if defined(USE_PPC_GFX)
-    if(cpufuncs & CPUF_PPC_ALTIVEC) {
-        imageFilterAddTo_Altivec(dst, src, length);
-    } else {
-        int n = length + 1;
-        BASIC_ADDTO();
-    }
-#elif defined(USE_X86_GFX)
+#if defined(USE_X86_GFX)
 
 #ifndef MACOSX
     if (cpufuncs & CPUF_X86_SSE2) {
@@ -125,14 +107,7 @@ void imageFilterAddTo(unsigned char *dst, unsigned char *src, int length)
 
 void imageFilterSubFrom(unsigned char *dst, unsigned char *src, int length)
 {
-#if defined(USE_PPC_GFX)
-    if(cpufuncs & CPUF_PPC_ALTIVEC) {
-        imageFilterSubFrom_Altivec(dst, src, length);
-    } else {
-        int n = length + 1;
-        BASIC_SUBFROM();
-    }
-#elif defined(USE_X86_GFX)
+#if defined(USE_X86_GFX)
 
 #ifndef MACOSX
     if (cpufuncs & CPUF_X86_SSE2) {
