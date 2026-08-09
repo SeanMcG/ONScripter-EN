@@ -37,8 +37,7 @@ namespace ons_gfx {
         CPUF_NONE           =  0,
         CPUF_X86_MMX        =  1,
         CPUF_X86_SSE        =  2,
-        CPUF_X86_SSE2       =  4,
-        CPUF_PPC_ALTIVEC    =  8
+        CPUF_X86_SSE2       =  4
     };
 
     void setCpufuncs(unsigned int func);

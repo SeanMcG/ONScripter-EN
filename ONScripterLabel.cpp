@@ -53,11 +53,6 @@
 #import <Foundation/NSObject.h>
 #import <Foundation/NSFileManager.h>
 
-#ifdef USE_PPC_GFX
-#include <sys/types.h>
-#include <sys/sysctl.h>
-#endif // USE_PPC_GFX
-
 #endif // MACOSX
 
 
@@ -91,11 +86,6 @@ extern "C" void waveCallback( int channel );
 
 #define SAVEFILE_VERSION_MAJOR 2
 #define SAVEFILE_VERSION_MINOR 6
-
-#ifdef USE_PPC_GFX
-#define MESSAGE_PPC_ALTIVEC_SUPPORTED "System info: PowerPC CPU, supports AltiVec"
-#define MESSAGE_PPC_ALTIVEC_UNSUPPORTED "System info: PowerPC CPU, DOES NOT support AltiVec"
-#endif
 
 typedef int (ONScripterLabel::*FuncList)();
 static struct FuncLUT{
@@ -784,38 +774,6 @@ ONScripterLabel::ONScripterLabel()
     // x86 CPU on Mac OS X all support SSE2
     ons_gfx::setCpufuncs(ons_gfx::CPUF_X86_SSE2);
     printf("System info: Intel CPU with SSE2 functionality\n");
-#elif defined(USE_PPC_GFX) && !defined(MACOSX) && SDL_VERSION_ATLEAST(1, 2, 7)
-    // Trust SDL's internals to test for the presence of AltiVec (SeanMcG)
-    {
-        using namespace ons_gfx;
-        unsigned int func = CPUF_NONE;
-        bool altivec_present = SDL_HasAltiVec();
-
-        if(altivec_present) {
-            func |= CPUF_PPC_ALTIVEC;
-        }
-        printf("%s\n", altivec_present ? MESSAGE_PPC_ALTIVEC_SUPPORTED : MESSAGE_PPC_ALTIVEC_UNSUPPORTED);
-        setCpufuncs(func);
-    }
-#elif defined(USE_PPC_GFX) && defined(MACOSX)
-    // Determine if this PPC CPU supports AltiVec (Roto)
-    {
-        using namespace ons_gfx;
-        unsigned int func = CPUF_NONE;
-        int altivec_present = 0;
-    
-        size_t length = sizeof(altivec_present);
-        int error = sysctlbyname("hw.optional.altivec", &altivec_present, &length, NULL, 0);
-        if(error) {
-            setCpufuncs(CPUF_NONE);
-            return;
-        }
-        if(altivec_present) {
-            func |= CPUF_PPC_ALTIVEC;
-        }
-        printf("%s\n", altivec_present ? MESSAGE_PPC_ALTIVEC_SUPPORTED : MESSAGE_PPC_ALTIVEC_UNSUPPORTED);
-        setCpufuncs(func);
-    }
 #else
     disableCpuGfx();
 #endif
