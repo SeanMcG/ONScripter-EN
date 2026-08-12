@@ -96,8 +96,6 @@ jobs:
           mingw-w64-${{matrix.env}}-SDL_ttf
           mingw-w64-${{matrix.env}}-SDL_image
           mingw-w64-${{matrix.env}}-bzip2
-          mingw-w64-${{matrix.env}}-libmikmod
-          mingw-w64-${{matrix.env}}-libmad
           mingw-w64-${{matrix.env}}-libogg
           mingw-w64-${{matrix.env}}-libvorbis
           mingw-w64-${{matrix.env}}-freetype
